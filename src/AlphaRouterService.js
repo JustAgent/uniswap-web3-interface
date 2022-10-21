@@ -5,7 +5,7 @@ const JSBI = require('jsbi')
 const ERC20ABI = require('./abi.json')
 
 const V3_SWAP_ROUTER_ADDRESS = '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'
-const REACT_APP_INFURA_URL_TESTNET = ""
+const REACT_APP_INFURA_URL_TESTNET = "https://goerli.infura.io/v3/da02af60e424426cab1114b22a66fd95"
 
 
 const chainId = 5
@@ -15,7 +15,7 @@ const router = new AlphaRouter({ chainId: chainId, provider: web3Provider })
 const name0 = 'Wrapped Ether'
 const symbol0 = 'WETH'
 const decimals0 = 18
-const address0 = '0xc778417e063141139fce010982780140aa0cd5ab'
+const address0 = '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6'
 
 const name1 = 'Uniswap Token'
 const symbol1 = 'UNI'
@@ -25,16 +25,17 @@ const address1 = '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984'
 const WETH = new Token(chainId, address0, decimals0, symbol0, name0)
 const UNI = new Token(chainId, address1, decimals1, symbol1, name1)
 console.log(REACT_APP_INFURA_URL_TESTNET);
-debugger
+
 export const getWethContract = () => new ethers.Contract(address0, ERC20ABI, web3Provider)
 export const getUniContract = () => new ethers.Contract(address1, ERC20ABI, web3Provider)
 
 export const getPrice = async (inputAmount, slippageAmount, deadline, walletAddress) => {
-    debugger
+    
   const percentSlippage = new Percent(slippageAmount, 100)
+  debugger
   const wei = ethers.utils.parseUnits(inputAmount.toString(), decimals0)
+  debugger
   const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(wei))
-
   const route = await router.route(
     currencyAmount,
     UNI,

@@ -16,7 +16,7 @@ function App() {
   const [signer, setsigner] = useState(undefined)
   const [signerAddress, setsignerAddress] = useState(undefined)
 
-  const [slippageAmount, setSlippageAmount] = useState(0.01)
+  const [slippageAmount, setSlippageAmount] = useState(1)
   const [deadlineMinutes, setDeadlineMinutes] = useState(10)
   const [showModal, setShowModal] = useState(undefined)
 
@@ -57,15 +57,16 @@ const getWalletAddress = () => {
   signer.getAddress()
   .then(address => {
     setsignerAddress(address)
-    console.log(address);
+    console.log('ADDRESS',address);
+    
     wethContract.balanceOf(address)
     .then(res => {
-      setWethAmount(Number(ethers.utils.formatEther(Number)))
+      setWethAmount(Number(ethers.utils.formatEther(res)))
     })
-
+    
     uniContract.balanceOf(address)
     .then(res => {
-      setUniAmount(Number(ethers.utils.formatEther(Number)))
+      setUniAmount(Number(ethers.utils.formatEther(res)))
     })
     
   })
@@ -74,6 +75,7 @@ const getWalletAddress = () => {
 if (signer != undefined) {
   
   getWalletAddress()
+  
 }
 
 const isConnected = () => signer != undefined
@@ -81,7 +83,7 @@ const isConnected = () => signer != undefined
 const getSwapPrice = (inputAmount) => {
   setLoading(true)
   setInputAmount(inputAmount)
-
+  
   const swap = getPrice(
     inputAmount,
     slippageAmount,
