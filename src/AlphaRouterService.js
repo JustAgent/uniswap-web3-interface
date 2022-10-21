@@ -5,7 +5,7 @@ const JSBI = require('jsbi')
 const ERC20ABI = require('./abi.json')
 
 const V3_SWAP_ROUTER_ADDRESS = '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'
-const REACT_APP_INFURA_URL_TESTNET = "https://goerli.infura.io/v3/da02af60e424426cab1114b22a66fd95"
+const REACT_APP_INFURA_URL_TESTNET = ""
 
 
 const chainId = 5
