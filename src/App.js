@@ -1,11 +1,15 @@
 import './App.css';
 import { useEffect, useState } from 'react';
 import {ethers} from 'ethers';
-import PageButton from './components/PageButton';
-import ConnectButton from './components/ConnectButton';
 import { GearFill } from 'react-bootstrap-icons';
-import ConfigModal from './components/ConfigModal';
+import ConnectButton from './components/ConnectButton';
 
+import PageButton from './components/PageButton';
+import ConfigModal from './components/ConfigModal';
+import BeatLoader from 'react-spinners/BeatLoader'
+import CurrencyField from './components/CurrencyField';
+
+import { getWethContract, getUniContract, getPrice, runSwap } from './AlphaRouterService';
 
 function App() {
   const [provider, setprovider] = useState(undefined)
@@ -16,11 +20,28 @@ function App() {
   const [deadlineMinutes, setDeadlineMinutes] = useState(10)
   const [showModal, setShowModal] = useState(undefined)
 
+  const [inputAmount, setInputAmount] = useState(undefined)
+  const [outputAmount, setOutputAmount] = useState(undefined)
+  const [transaction, setTransaction] = useState(undefined)
+  const [loading, setLoading] = useState(undefined)
+  const [ratio, setRatio] = useState(undefined)
+  const [wethContract, setWethContract] = useState(undefined)
+  const [uniContract, setUniContract] = useState(undefined)
+  const [wethAmount, setWethAmount] = useState(undefined)
+  const [uniAmount, setUniAmount] = useState(undefined)
+
 useEffect(() => {
   const onload = async () => {
     const provider = await new ethers.providers.Web3Provider(window.ethereum)
     setprovider(provider)
+
+    const wethContract = getWethContract()
+    setWethContract(wethContract)
+
+    const uniContract = getUniContract()
+    setUniContract(uniContract)
   }
+
   onload()
 }, [])
 
@@ -28,21 +49,52 @@ const getSigner = async provider => {
   await provider.send("eth_requestAccounts", [])
   const signer = provider.getSigner()
   setsigner(signer)
+  
 }
 
 const getWalletAddress = () => {
+  
   signer.getAddress()
   .then(address => {
     setsignerAddress(address)
+    console.log(address);
+    wethContract.balanceOf(address)
+    .then(res => {
+      setWethAmount(Number(ethers.utils.formatEther(Number)))
+    })
+
+    uniContract.balanceOf(address)
+    .then(res => {
+      setUniAmount(Number(ethers.utils.formatEther(Number)))
+    })
+    
   })
 }
 
 if (signer != undefined) {
+  
   getWalletAddress()
 }
 
 const isConnected = () => signer != undefined
 
+const getSwapPrice = (inputAmount) => {
+  setLoading(true)
+  setInputAmount(inputAmount)
+
+  const swap = getPrice(
+    inputAmount,
+    slippageAmount,
+    Math.floor(Date.now()/1000 + (deadlineMinutes * 60)),
+    signerAddress
+  ).then(data => {
+    setTransaction(data[0])
+    setOutputAmount(data[1])
+    setRatio(data[2])
+    setLoading(false)
+  })
+}
+ 
 
   return (
     <div className="App">
@@ -87,6 +139,27 @@ const isConnected = () => signer != undefined
                 slippageAmount={slippageAmount} />
             )}
           </div>
+
+          <div className='swapBody'>
+              <CurrencyField
+              field="input"
+              tokenName="WETH"
+              getSwapPrice={getSwapPrice}
+              signer={signer}
+              balance={wethAmount} />
+            <CurrencyField
+              field="output"
+              tokenName="UNI"
+              value={outputAmount}           
+              signer={signer}
+              balance={wethAmount}
+              spinner={BeatLoader}
+              loading={loading}
+              />
+
+
+          </div>
+
         </div>
       </div>
     </div>
